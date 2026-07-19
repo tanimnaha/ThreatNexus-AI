@@ -1,0 +1,415 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<section class="dashboard">
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <span class="dashboard-badge">
+                🛡 SECURITY OPERATIONS CENTER
+            </span>
+
+            <h1>ThreatNexus AI</h1>
+
+            <p>AI-Driven Global Cyber Threat Intelligence Platform</p>
+
+        </div>
+
+        <div class="live-status">
+            <span class="live-dot"></span>
+            LIVE MONITORING
+        </div>
+
+    </div>
+
+    <!-- Search -->
+
+    <div class="panel" style="margin-bottom:25px;">
+
+        <h3>🔍 Search Threat Intelligence</h3>
+
+        <form method="GET"
+              action="{{ url_for('main.dashboard') }}"
+              class="filter-form">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search IP, Country, City, Attack..."
+                value="{{ request.args.get('search','') }}"
+                class="filter-input">
+
+            <select
+                name="severity"
+                class="filter-select">
+
+                <option value="">All Severity</option>
+
+                <option value="Critical"
+                    {% if request.args.get('severity')=='Critical' %}selected{% endif %}>
+                    Critical
+                </option>
+
+                <option value="High"
+                    {% if request.args.get('severity')=='High' %}selected{% endif %}>
+                    High
+                </option>
+
+                <option value="Medium"
+                    {% if request.args.get('severity')=='Medium' %}selected{% endif %}>
+                    Medium
+                </option>
+
+                <option value="Low"
+                    {% if request.args.get('severity')=='Low' %}selected{% endif %}>
+                    Low
+                </option>
+
+            </select>
+
+            <button class="btn">
+                Apply Filter
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- VirusTotal IOC Lookup -->
+
+    <div class="panel" style="margin-bottom:25px;">
+
+        <h3>🛡 VirusTotal IOC Lookup</h3>
+
+        <form method="GET"
+              action="{{ url_for('main.dashboard') }}"
+              class="filter-form">
+
+            <input
+                type="text"
+                name="ioc"
+                class="filter-input"
+                placeholder="Enter IP Address or Domain..."
+                value="{{ ioc }}">
+
+            <button class="btn">
+                Lookup
+            </button>
+
+        </form>
+
+    </div>
+
+    {% if vt_result %}
+
+    <div class="panel" style="margin-bottom:25px;">
+
+        <h3>🔎 IOC Details</h3>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <h2>{{ vt_result.type }}</h2>
+                <p>Type</p>
+            </div>
+
+            <div class="stat-card">
+                <h2>{{ vt_result.country }}</h2>
+                <p>Country</p>
+            </div>
+
+            <div class="stat-card">
+                <h2>{{ vt_result.reputation }}</h2>
+                <p>Reputation</p>
+            </div>
+
+            <div class="stat-card danger">
+                <h2>{{ vt_result.malicious }}</h2>
+                <p>Malicious</p>
+            </div>
+
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="panel">
+
+                <h3>Lookup Result</h3>
+
+                <p><strong>Query:</strong> {{ vt_result.query }}</p>
+
+                <p><strong>ASN:</strong> {{ vt_result.asn }}</p>
+
+                <p><strong>Owner:</strong> {{ vt_result.as_owner }}</p>
+
+                <p><strong>Network:</strong> {{ vt_result.network }}</p>
+
+                <p><strong>Country:</strong> {{ vt_result.country }}</p>
+
+                <p><strong>Last Analysis:</strong> {{ vt_result.last_analysis_date }}</p>
+
+            </div>
+
+            <div class="panel">
+
+                <h3>Analysis Statistics</h3>
+
+                <p>✅ Harmless : {{ vt_result.harmless }}</p>
+
+                <p>⚠ Suspicious : {{ vt_result.suspicious }}</p>
+
+                <p>❌ Malicious : {{ vt_result.malicious }}</p>
+
+                <p>⭕ Undetected : {{ vt_result.undetected }}</p>
+
+                <p>⏱ Timeout : {{ vt_result.timeout }}</p>
+
+                {% if vt_result.tags %}
+
+                <p><strong>Tags:</strong></p>
+
+                <ul>
+
+                    {% for tag in vt_result.tags %}
+
+                    <li>{{ tag }}</li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- KPI -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h2>{{ total_threats }}</h2>
+            <p>Total Threats</p>
+        </div>
+
+        <div class="stat-card danger">
+            <h2>{{ critical }}</h2>
+            <p>Critical</p>
+        </div>
+
+        <div class="stat-card">
+            <h2>{{ high }}</h2>
+            <p>High</p>
+        </div>
+
+        <div class="stat-card">
+            <h2>{{ medium + low }}</h2>
+            <p>Medium / Low</p>
+        </div>
+
+    </div>
+        <!-- Dashboard Status -->
+
+    <div class="panel" style="margin-top:25px;">
+
+        <h3>🔄 Dashboard Status</h3>
+
+        <div class="ai-status">
+            <span>Status</span>
+            <strong>{{ refresh_status.status }}</strong>
+        </div>
+
+        <div class="ai-status">
+            <span>Refresh Interval</span>
+            <strong>{{ refresh_status.interval }} sec</strong>
+        </div>
+
+        <div class="ai-status">
+            <span>Last Refresh</span>
+            <strong>{{ refresh_status.last_refresh }}</strong>
+        </div>
+
+    </div>
+
+    <!-- MAP + AI -->
+
+    <div class="dashboard-grid" style="margin-top:25px;">
+
+        <div class="panel large-panel">
+
+            <h3>🌍 Global Threat Intelligence Map</h3>
+
+            <div class="world-map-container">
+                {{ world_map|safe }}
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>🤖 AI Threat Intelligence</h3>
+
+            <div class="ai-score">
+
+                <h1>{{ threat_score }}%</h1>
+
+                <span>Threat Score</span>
+
+            </div>
+
+            <div class="ai-status">
+                <span>Risk Level</span>
+                <strong>{{ risk_level }}</strong>
+            </div>
+
+            <div class="ai-status">
+                <span>Top Country</span>
+                <strong>{{ top_country }}</strong>
+            </div>
+
+            <div class="ai-status">
+                <span>Top Attack</span>
+                <strong>{{ top_attack }}</strong>
+            </div>
+
+            <div class="ai-recommendation">
+
+                {{ recommendation }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Timeline + Severity -->
+
+    <div class="dashboard-grid" style="margin-top:25px;">
+
+        <div class="panel">
+
+            <h3>📈 Threat Timeline</h3>
+
+            {{ timeline_chart|safe }}
+
+        </div>
+
+        <div class="panel">
+
+            <h3>🚨 Severity Distribution</h3>
+
+            {{ severity_chart|safe }}
+
+        </div>
+
+    </div>
+
+    <!-- Country + Attack -->
+
+    <div class="dashboard-grid" style="margin-top:25px;">
+
+        <div class="panel">
+
+            <h3>🌎 Top Targeted Countries</h3>
+
+            {{ country_chart|safe }}
+
+        </div>
+
+        <div class="panel">
+
+            <h3>🥧 Attack Type Distribution</h3>
+
+            {{ attack_chart|safe }}
+
+        </div>
+
+    </div>
+
+    <!-- Status Chart -->
+
+    <div class="panel" style="margin-top:25px;">
+
+        <h3>📊 Threat Status Overview</h3>
+
+        {{ status_chart|safe }}
+
+    </div>
+
+    <!-- Live Feed -->
+
+    <div class="panel" style="margin-top:25px;">
+
+        <h3>🚨 Live Threat Feed</h3>
+
+        <div class="feed-list">
+
+            {% for threat in live_feed %}
+
+            <div class="feed-item">
+
+                <div class="feed-left">
+
+                    <span class="feed-ip">
+                        {{ threat.ip }}
+                    </span>
+
+                    <span class="feed-country">
+                        {{ threat.country }} • {{ threat.city }}
+                    </span>
+
+                    <br>
+
+                    <small>{{ threat.type }}</small>
+
+                    <br>
+
+                    <small>
+
+                        <strong>Tag:</strong>
+
+                        {% if threat.type == "Malware" %}
+                            Malware
+                        {% elif threat.type == "Phishing" %}
+                            Phishing
+                        {% elif threat.type == "Ransomware" %}
+                            Ransomware
+                        {% elif threat.type == "Botnet" %}
+                            Botnet
+                        {% elif threat.type == "Trojan" %}
+                            Trojan
+                        {% elif threat.type == "DDoS" %}
+                            DDoS
+                        {% else %}
+                            Unknown
+                        {% endif %}
+
+                    </small>
+
+                </div>
+
+                <span class="feed-severity severity-{{ threat.severity|lower }}">
+                    {{ threat.severity }}
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+{% endblock %}

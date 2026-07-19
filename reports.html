@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<section class="dashboard">
+
+    <div class="dashboard-header">
+
+        <div>
+            <h1>📑 Threat Reports</h1>
+            <p>Generate and download cybersecurity intelligence reports.</p>
+        </div>
+
+        <div class="status-badge">
+            REPORT CENTER
+        </div>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h2>{{ total_threats }}</h2>
+            <p>Total Threats</p>
+        </div>
+
+        <div class="stat-card critical">
+            <h2>{{ critical }}</h2>
+            <p>Critical</p>
+        </div>
+
+        <div class="stat-card high">
+            <h2>{{ high }}</h2>
+            <p>High</p>
+        </div>
+
+        <div class="stat-card medium">
+            <h2>{{ medium }}</h2>
+            <p>Medium</p>
+        </div>
+
+        <div class="stat-card low">
+            <h2>{{ low }}</h2>
+            <p>Low</p>
+        </div>
+
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="panel">
+
+            <h2>📄 Report Summary</h2>
+
+            <p><strong>Threat Score:</strong> {{ threat_score }}/100</p>
+
+            <p><strong>Risk Level:</strong> {{ risk_level }}</p>
+
+            <p><strong>Top Country:</strong> {{ top_country }}</p>
+
+            <p><strong>Top Attack:</strong> {{ top_attack }}</p>
+
+            <p><strong>Recommendation:</strong></p>
+
+            <p>{{ recommendation }}</p>
+
+        </div>
+
+        <div class="panel">
+
+            <h2>⬇ Download Reports</h2>
+
+            <br>
+
+            <a href="/download/csv" class="btn">
+                Download CSV Report
+            </a>
+
+            <br><br>
+
+            <a href="/download/pdf" class="btn">
+                Download PDF Report
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
